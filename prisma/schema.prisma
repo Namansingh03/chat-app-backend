@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  password    String
+  email       String   @unique
+  phoneNumber String   @unique
+  name        String
+  role        Role     @default(USER)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Banner {
+  id        String   @id @default(uuid())
+  title     String?
+  image     String   @unique
+  link      String
+  createdAt DateTime @default(now())
+
+  @@map("banners")
+}
+
+model Course {
+  id        String          @id @default(cuid())
+  name      String
+  image     String?
+  contents  CourseContent[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@map("courses")
+}
+
+model CourseContent {
+  id          String      @id @default(cuid())
+  type        ContentType
+  description String?
+  assetLink   String?
+  courseId    String
+  course      Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+
+  @@map("course_contents")
+}
+
+model Channel {
+  id        String           @id @default(cuid())
+  name      String
+  image     String
+  messages  ChannelMessage[]
+  createdAt DateTime         @default(now())
+
+  @@map("channels")
+}
+
+model ChannelMessage {
+  id          String      @id @default(cuid())
+  message     String?
+  assetLink   String?
+  contentType ContentType
+  channelId   String
+  channel     Channel     @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+
+  @@map("channel_messages")
+}
+
+enum ContentType {
+  TEXT
+  IMAGE
+  VIDEO
+}
+
+enum Role {
+  USER
+  ADMIN
+}
